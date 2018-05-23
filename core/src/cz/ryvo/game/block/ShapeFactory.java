@@ -1,21 +1,24 @@
-package cz.ryvo.game.tile;
+package cz.ryvo.game.block;
 
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 
 import java.util.Set;
-
-import static cz.ryvo.game.config.Config.BLOCK_SIZE;
 
 public class ShapeFactory {
 
     private AssetManager assets;
+    private EventListener listener;
+    private final int blockSize;
 
-    public ShapeFactory(AssetManager assets) {
+    public ShapeFactory(int blockSize, AssetManager assets, EventListener listener) {
         this.assets = assets;
+        this.listener = listener;
+        this.blockSize = blockSize;
     }
 
     public Shape createShape(Set<BlockPosition> blockPositions, ShapeColour colour) {
@@ -31,8 +34,8 @@ public class ShapeFactory {
         Pixmap blockPixmap = textureData.consumePixmap();
 
         for (BlockPosition position : blockPositions) {
-            texturePixmap.drawPixmap(blockPixmap,0, 0, blockPixmap.getWidth(), blockPixmap.getHeight(), position.getX() * BLOCK_SIZE, shapeBounds.getY() - (position.getY() + 1) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-            maskPixmap.fillRectangle(position.getX() * BLOCK_SIZE, position.getY() * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+            texturePixmap.drawPixmap(blockPixmap,0, 0, blockPixmap.getWidth(), blockPixmap.getHeight(), position.getX() * blockSize, shapeBounds.getY() - (position.getY() + 1) * blockSize, blockSize, blockSize);
+            maskPixmap.fillRectangle(position.getX() * blockSize, position.getY() * blockSize, blockSize, blockSize);
         }
 
         Texture shapeTexture = new Texture(texturePixmap);
@@ -42,7 +45,7 @@ public class ShapeFactory {
         texturePixmap.dispose();
         //maskPixmap.dispose();
 
-        return new Shape(shapeTexture, maskPixmap);
+        return new Shape(shapeTexture, maskPixmap, listener);
     }
 
     private BlockPosition getShapeBounds(Set<BlockPosition> blockPositions) {
@@ -52,7 +55,7 @@ public class ShapeFactory {
             if (point.getX() > maxX) maxX = point.getX();
             if (point.getY() > maxY) maxY = point.getY();
         }
-        return new BlockPosition((maxX + 1) * BLOCK_SIZE, (maxY + 1) * BLOCK_SIZE);
+        return new BlockPosition((maxX + 1) * blockSize, (maxY + 1) * blockSize);
     }
 
     private Pixmap newPixmap(int width, int height) {
