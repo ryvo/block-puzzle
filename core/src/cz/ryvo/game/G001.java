@@ -27,13 +27,16 @@ public class G001 extends Game implements LoadAssetsListener {
     public I18NBundle bundle;
     public SpriteBatch batch;
     public BitmapFont font;
+    public Config config;
 
     public LoadingScreen loadingScreen;
 
 	@Override
 	public void create () {
+        config = Config.getInstance();
+
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, Config.SCREEN_WIDTH, Config.SCREEN_HEIGHT);
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch = new SpriteBatch();
         font = new BitmapFont();
 

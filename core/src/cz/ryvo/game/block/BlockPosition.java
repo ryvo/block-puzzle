@@ -1,4 +1,4 @@
-package cz.ryvo.game.tile;
+package cz.ryvo.game.block;
 
 public class BlockPosition {
 
