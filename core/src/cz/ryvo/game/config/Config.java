@@ -18,11 +18,11 @@ public class Config {
     private static Config config;
 
     private final int blockSize;
-    private final int playBoardBlocksPerRow;
-    private final int playBoardBlocksPerColumn;
-    private final int gridOfBlocksWidth;
-    private final int gridOfBlocksHeight;
-    private final int playBoardPadding;
+    private final int boardWidthInBlocks;
+    private final int boardHeightInBlocks;
+    private final int boardWidth;
+    private final int boardHeight;
+    private final int boardMargin;
 
     private Config() {
         int screenWidth = Gdx.graphics.getWidth();
@@ -31,14 +31,14 @@ public class Config {
         int preliminaryPadding = (int)(screenWidth * (PLAY_BOARD_PADDING_PERCENTAGE / 100f) / 2);
 
         int playAreaWidth = screenWidth - 2 * preliminaryPadding;
-        playBoardBlocksPerRow = PLAY_BOARD_BLOCKS_PER_ROW;
-        blockSize = playAreaWidth / playBoardBlocksPerRow;
-        gridOfBlocksWidth = blockSize * playBoardBlocksPerRow;
-        playBoardPadding = (screenWidth - gridOfBlocksWidth) / 2;
+        boardWidthInBlocks = PLAY_BOARD_BLOCKS_PER_ROW;
+        blockSize = playAreaWidth / boardWidthInBlocks;
+        boardWidth = blockSize * boardWidthInBlocks;
+        boardMargin = (screenWidth - boardWidth) / 2;
 
-        int playAreaHeight = screenHeight - PLAY_TOOLBAR_HEIGHT - 2 * playBoardPadding - ADVERTISEMENT_AREA_HEIGHT;
-        playBoardBlocksPerColumn = playAreaHeight / blockSize;
-        gridOfBlocksHeight = playBoardBlocksPerColumn * blockSize;
+        int playAreaHeight = screenHeight - PLAY_TOOLBAR_HEIGHT - 2 * boardMargin - ADVERTISEMENT_AREA_HEIGHT;
+        boardHeightInBlocks = playAreaHeight / blockSize;
+        boardHeight = boardHeightInBlocks * blockSize;
 
         System.out.println(toString());
     }
@@ -54,35 +54,43 @@ public class Config {
         return blockSize;
     }
 
-    public int getPlayBoardBlocksPerRow() {
-        return playBoardBlocksPerRow;
+    public int getBoardWidthInBlocks() {
+        return boardWidthInBlocks;
     }
 
-    public int getPlayBoardBlocksPerColumn() {
-        return playBoardBlocksPerColumn;
+    public int getBoardHeightInBlocks() {
+        return boardHeightInBlocks;
     }
 
-    public int getGridOfBlocksWidth() {
-        return gridOfBlocksWidth;
+    public int getBoardWidth() {
+        return boardWidth;
     }
 
-    public int getGridOfBlocksHeight() {
-        return gridOfBlocksHeight;
+    public int getBoardHeight() {
+        return boardHeight;
     }
 
-    public int getPlayBoardPadding() {
-        return playBoardPadding;
+    public int getBoardMargin() {
+        return boardMargin;
+    }
+
+    public int getAdvertisementAreaHeight() {
+        return ADVERTISEMENT_AREA_HEIGHT;
+    }
+
+    public int getBoardBottom() {
+        return ADVERTISEMENT_AREA_HEIGHT + boardMargin;
     }
 
     @Override
     public String toString() {
         return "Config{" +
                 "blockSize=" + blockSize +
-                ", playBoardBlocksPerRow=" + playBoardBlocksPerRow +
-                ", playBoardBlocksPerColumn=" + playBoardBlocksPerColumn +
-                ", gridOfBlocksWidth=" + gridOfBlocksWidth +
-                ", gridOfBlocksHeight=" + gridOfBlocksHeight +
-                ", playBoardPadding=" + playBoardPadding +
+                ", playBoardBlocksPerRow=" + boardWidthInBlocks +
+                ", playBoardBlocksPerColumn=" + boardHeightInBlocks +
+                ", gridOfBlocksWidth=" + boardWidth +
+                ", gridOfBlocksHeight=" + boardHeight +
+                ", playBoardPadding=" + boardMargin +
                 '}';
     }
 }

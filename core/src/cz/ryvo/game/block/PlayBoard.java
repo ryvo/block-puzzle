@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.Texture;
 
 import cz.ryvo.game.level.GridMap;
 
-public class PlayingBoard extends Texture {
+public class PlayBoard extends Texture {
 
     private final GridMap grid;
 
-    public PlayingBoard(int blockSize, GridMap grid) {
+    public PlayBoard(int blockSize, GridMap grid) {
         super(createTexture(blockSize, grid));
         this.grid = grid;
     }

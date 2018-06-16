@@ -9,56 +9,57 @@ import cz.ryvo.game.stage.PlayEvent;
 
 public class ShapeGestureListener extends ActorGestureListener {
 
-    public ShapeGestureListener() {
+    private final EventListener listener;
+
+    public ShapeGestureListener(EventListener listener) {
+        this.listener = listener;
     }
 
     @Override
     public void touchDown (InputEvent event, float x, float y, int pointer, int button) {
         Shape shape = (Shape) event.getTarget();
 
-        if (shape.getStage() instanceof EventListener) {
-            PlayEvent playStageEvent = createEvent(shape);
-            playStageEvent.setType(PlayEvent.Type.touchDown);
-            playStageEvent.setX(x);
-            playStageEvent.setY(y);
+        PlayEvent playStageEvent = createEvent(shape);
+        playStageEvent.setType(PlayEvent.Type.touchDown);
+        playStageEvent.setX(x);
+        playStageEvent.setY(y);
+        playStageEvent.setTarget(shape);
 
-            ((EventListener) shape.getStage()).handle(playStageEvent);
+        listener.handle(playStageEvent);
 
-            Pools.free(playStageEvent);
-        }
+        Pools.free(playStageEvent);
     }
 
     @Override
     public void pan (InputEvent event, float x, float y, float deltaX, float deltaY) {
         Shape shape = (Shape) event.getTarget();
 
-        if (shape.getStage() instanceof EventListener) {
-            PlayEvent playStageEvent = createEvent(shape);
-            playStageEvent.setType(PlayEvent.Type.touchDragged);
-            playStageEvent.setX(x);
-            playStageEvent.setY(y);
-            playStageEvent.setDeltaX(deltaX);
-            playStageEvent.setDeltaY(deltaY);
+        PlayEvent playStageEvent = createEvent(shape);
+        playStageEvent.setType(PlayEvent.Type.touchDragged);
+        playStageEvent.setX(shape.getX());
+        playStageEvent.setY(shape.getY());
+        playStageEvent.setDeltaX(deltaX);
+        playStageEvent.setDeltaY(deltaY);
+        playStageEvent.setTarget(shape);
 
-            ((EventListener) shape.getStage()).handle(playStageEvent);
+        listener.handle(playStageEvent);
 
-            Pools.free(playStageEvent);
-        }
+        Pools.free(playStageEvent);
     }
 
     @Override
     public void touchUp (InputEvent event, float x, float y, int pointer, int button) {
         Shape shape = (Shape) event.getTarget();
-        if (shape.getStage() instanceof EventListener) {
-            PlayEvent playStageEvent = createEvent(shape);
-            playStageEvent.setType(PlayEvent.Type.touchUp);
-            playStageEvent.setX(x);
-            playStageEvent.setY(y);
 
-            ((EventListener) shape.getStage()).handle(playStageEvent);
+        PlayEvent playStageEvent = createEvent(shape);
+        playStageEvent.setType(PlayEvent.Type.touchUp);
+        playStageEvent.setX(x);
+        playStageEvent.setY(y);
+        playStageEvent.setTarget(shape);
 
-            Pools.free(playStageEvent);
-        }
+        listener.handle(playStageEvent);
+
+        Pools.free(playStageEvent);
     }
 
     private PlayEvent createEvent(Shape shape) {

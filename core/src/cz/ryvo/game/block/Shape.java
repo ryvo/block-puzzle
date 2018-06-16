@@ -13,28 +13,38 @@ public class Shape extends Image {
 
     public static final Color MASK_COLOR = Color.WHITE;
 
+    private final int heightInBlocks;
+    private final int widthInBlocks;
     private final Texture texture;
     private final Pixmap mask;
-    private final int maskColor;
-    private Vector2 lastPosition;
-    private boolean isBeeingPanned = false;
-    private EventListener listener;
 
-    public Shape(Texture texture, Pixmap mask, EventListener listener) {
+    public Shape(int widthInBlocks, int heightInBlocks, Texture texture, Pixmap mask, EventListener listener) {
         super(texture);
+        this.widthInBlocks = widthInBlocks;
+        this.heightInBlocks = heightInBlocks;
         this.texture = texture;
         this.mask = mask;
-        this.listener = listener;
-        maskColor = MASK_COLOR.toIntBits();
-        this.addListener(new ShapeGestureListener());
+        this.addListener(new ShapeGestureListener(listener));
     }
 
     @Override
     public Actor hit(float x, float y, boolean touchable) {
         if (touchable && this.getTouchable() != Touchable.enabled) return null;
-        if (maskColor == mask.getPixel(Math.round(x), Math.round(y))) {
+        if (MASK_COLOR.toIntBits() == mask.getPixel(Math.round(x), Math.round(y))) {
             return this;
         }
         return null;
+    }
+
+    public Texture getTexture() {
+        return texture;
+    }
+
+    public int getHeightInBlocks() {
+        return heightInBlocks;
+    }
+
+    public int getWidthInBlocks() {
+        return widthInBlocks;
     }
 }

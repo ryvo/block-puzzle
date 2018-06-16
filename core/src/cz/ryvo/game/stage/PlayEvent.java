@@ -9,6 +9,7 @@ public class PlayEvent extends Event {
     private float y;
     private float deltaX;
     private float deltaY;
+    private Object target;
 
     public Type getType() {
         return type;
