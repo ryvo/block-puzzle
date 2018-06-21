@@ -18,12 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cz.ryvo.game.G001;
-import cz.ryvo.game.block.PlayBoard;
 import cz.ryvo.game.block.Shape;
-import cz.ryvo.game.block.ShapeColour;
 import cz.ryvo.game.block.ShapeFactory;
+import cz.ryvo.game.block.ShapeGestureListener;
+import cz.ryvo.game.block.TargetArea;
 import cz.ryvo.game.config.Config;
+import cz.ryvo.game.level.JsonLevelReader;
 import cz.ryvo.game.level.Level;
+import cz.ryvo.game.level.LevelShape;
+import cz.ryvo.game.map2d.Map2D;
 import cz.ryvo.game.model.IntVector2;
 import cz.ryvo.game.stage.PlayEvent;
 import cz.ryvo.game.stage.PlayStage;
@@ -40,11 +43,11 @@ public class PlayScreen implements Screen, EventListener {
 
     private Image image;
 
-    private ActorGestureListener listener;
+    private ActorGestureListener gestureListener;
 
     private Level level;
 
-    private PlayBoard playBoard;
+    private TargetArea targetArea;
 
     private ShapeRenderer shapeRenderer;
 
@@ -54,46 +57,48 @@ public class PlayScreen implements Screen, EventListener {
 
     private IntVector2 shapeGridPosition;
 
+    private Map2D collisionMatrix;
 
 
     public PlayScreen(G001 game) {
         this.game = game;
         this.config = Config.getInstance();
 
-        int[][] shapeLayout = {
-                {1,1,0,0,0},
-                {1,0,0,0,1},
-                {1,0,1,1,1},
-                {1,1,1,0,1}
-        };
-
         FitViewport viewport = new FitViewport(Gdx.app.getGraphics().getWidth(), Gdx.graphics.getHeight(), game.camera);
         this.stage = new PlayStage(viewport);
 
-        ShapeFactory factory = new ShapeFactory(game.config.getBlockSize(), game.assets, this);
-
-        shapes = new ArrayList<Shape>();
-        shapes.add(factory.createShape(shapeLayout, ShapeColour.RED));
-
+        gestureListener = new ShapeGestureListener(this);
+        level = JsonLevelReader.readFromFile("levels/level-001.json");
+        createAndSetTargetArea(level);
+        createSndSetShapes(level, gestureListener);
 
         Gdx.input.setInputProcessor(stage);
         image = new Image(game.assets.get("sand.png", Texture.class));
 
-        for (Shape shape : shapes) {
-            stage.addActor(shape);
-            shape.setPosition(32, 32);
-            //shape.getColor().a = 0.5f;
-        }
-
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setProjectionMatrix(this.game.camera.combined);
+
+        collisionMatrix = new Map2D(config.getBoardWidthInBlocks(), config.getBoardHeightInBlocks());
+    }
+
+    private void createAndSetTargetArea(Level level) {
+        targetArea = new TargetArea(game.config.getBlockSize(), level.getTargetArea());
+    }
+
+    private void createSndSetShapes(Level level, ActorGestureListener gestureListener) {
+        shapes = new ArrayList<Shape>();
+        ShapeFactory shapeFactory = new ShapeFactory(game.config.getBlockSize(), game.assets);
+        for(LevelShape levelShape : level.getShapes()) {
+            Shape shape = shapeFactory.createShape(levelShape);
+            shape.addListener(gestureListener);
+            shape.setPosition(32, 32);
+            stage.addActor(shape);
+        }
     }
 
     @Override
     public void show() {
         game.batch.setProjectionMatrix(game.camera.combined);
-        level = new Level("levels/level-001.json");
-        playBoard = new PlayBoard(game.config.getBlockSize(), level.getBoard());
     }
 
     @Override
@@ -102,12 +107,12 @@ public class PlayScreen implements Screen, EventListener {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         game.batch.begin();
         game.batch.draw(game.assets.get("sand.png", Texture.class), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        game.batch.draw(playBoard, 100, 300);
+        game.batch.draw(targetArea, 100, 300);
 
         // Render moving shape phantom
         if (shapeGridPosition != null) {
             Color colorBackup = game.batch.getColor();
-            Color color = Color.WHITE;
+            Color color = new Color(Color.WHITE);
             color.a = 0.5f;
             game.batch.setColor(color);
             game.batch.draw(shapeTexture,

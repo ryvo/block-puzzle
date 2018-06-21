@@ -1,30 +1,22 @@
 package cz.ryvo.game.level;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.utils.JsonReader;
-import com.badlogic.gdx.utils.JsonValue;
+import java.util.List;
 
 public class Level {
 
-    private GridMap board;
+    LevelTargetArea targetArea;
+    List<LevelShape> shapes;
 
-    public Level(String levelName) {
-        load(levelName);
+    public Level(LevelTargetArea targetArea, List<LevelShape> shapes) {
+        this.targetArea = targetArea;
+        this.shapes = shapes;
     }
 
-    private void load(String levelName) {
-        JsonReader reader = new JsonReader();
-        JsonValue jsonRoot = reader.parse(Gdx.files.internal(levelName));
-
-        JsonValue jsonBoard = jsonRoot.get("board");
-        board = new GridMap(
-                jsonBoard.get("width").asInt(),
-                jsonBoard.get("height").asInt(),
-                jsonBoard.get("data").asIntArray()
-        );
+    public LevelTargetArea getTargetArea() {
+        return targetArea;
     }
 
-    public GridMap getBoard() {
-        return board;
+    public List<LevelShape> getShapes() {
+        return shapes;
     }
 }
