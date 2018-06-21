@@ -5,38 +5,39 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.TextureData;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 
-import cz.ryvo.game.model.IntVector2;
+import cz.ryvo.game.level.LevelShape;
 
 public class ShapeFactory {
 
-    private AssetManager assets;
-    private EventListener listener;
     private final int blockSize;
+    private final AssetManager assets;
 
-    public ShapeFactory(int blockSize, AssetManager assets, EventListener listener) {
+    public ShapeFactory(int blockSize, AssetManager assets) {
         this.assets = assets;
-        this.listener = listener;
         this.blockSize = blockSize;
     }
 
-    public Shape createShape(int[][] shapeLayout, ShapeColour colour) {
-        IntVector2 dimensionInBlocks = getShapeDimensionInBlocks(shapeLayout);
-        IntVector2 dimension = new IntVector2(dimensionInBlocks.getX() * blockSize, dimensionInBlocks.getY() * blockSize);
+    public Shape createShape(LevelShape levelShape) {
+        int widthInBlocks = levelShape.getLayout().getWidth();
+        int heightInBlocks = levelShape.getLayout().getHeight();
 
-        Pixmap texturePixmap = newPixmap(dimension.getX(), dimension.getY());
+        int width = widthInBlocks * blockSize;
+        int height = heightInBlocks * blockSize;
 
-        Pixmap maskPixmap = newPixmap(dimension.getX(), dimension.getY());
+        Pixmap texturePixmap = newPixmap(width, height);
+        texturePixmap.setColor(Shape.MASK_COLOR);
+
+        Pixmap maskPixmap = newPixmap(width, height);
         maskPixmap.setColor(Shape.MASK_COLOR);
 
-        Pixmap blockPixmap = getBlockPixmap(colour);
+        Pixmap blockPixmap = newBlockPixmap(assets, levelShape.getColour());
 
-        for (int row = 0; row < shapeLayout.length; row++) {
-            for (int col = 0; col < shapeLayout[row].length; col++) {
-                if (shapeLayout[row][col] == 1) {
-                    int x = col * blockSize;
-                    int y = row * blockSize;
+        for (int yb = 0; yb < heightInBlocks; yb++) {
+            for (int xb = 0; xb < widthInBlocks; xb++) {
+                if (levelShape.getLayout().isSet(xb, yb)) {
+                    int x = xb * blockSize;
+                    int y = yb * blockSize;
                     texturePixmap.drawPixmap(blockPixmap, 0, 0, blockPixmap.getWidth(), blockPixmap.getHeight(), x, y, blockSize, blockSize);
                     maskPixmap.fillRectangle(x, y, blockSize, blockSize);
                 }
@@ -48,19 +49,10 @@ public class ShapeFactory {
         blockPixmap.dispose();
         texturePixmap.dispose();
 
-        return new Shape(dimensionInBlocks.getX(), dimensionInBlocks.getY(), shapeTexture, maskPixmap, listener);
+        return new Shape(levelShape, shapeTexture, maskPixmap);
     }
 
-    private IntVector2 getShapeDimensionInBlocks(int[][] shapeLayout) {
-        int maxHeight = shapeLayout.length;
-        int maxWidth = 0;
-        for (int y = 0; y < shapeLayout.length; y++) {
-            maxWidth = Math.max(maxWidth, shapeLayout[y].length);
-        }
-        return new IntVector2(maxWidth, maxHeight);
-    }
-
-    private Pixmap getBlockPixmap(ShapeColour colour) {
+    private Pixmap newBlockPixmap(AssetManager assets, ShapeColour colour) {
         String colourName = colour.name().toLowerCase();
         Texture blockTexture = assets.get("block-" + colourName + ".png", Texture.class);
         TextureData textureData = blockTexture.getTextureData();
